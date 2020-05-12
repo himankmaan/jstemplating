@@ -9,18 +9,69 @@
 			href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
 			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
 			crossorigin="anonymous"
-		/>              
+        /> 
+        <script
+            defer
+            src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"
+            integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP"
+            crossorigin="anonymous"
+        ></script>             
     </head>
 
     <body>
         <nav class="navbar navbar-dark bg-dark">
-			<span class="navbar-brand mb-0 h1">Xpers</span>
-		</nav>
-        <h1 id="headingTotal"></h1>
-        <input id="inputamount"type="text">
-        <input id="inputDesc" type="text">
-        <button id="btnaddexpense">+</button>
-        <div id="expenseTable"></div>
+            <span class="navbar-brand mb-0 h1">Xpers</span>
+            <span class="navbar-brand mb-0 h1" id="headingTotal"></span>
+            
+        </nav>
+        
+        <div class="container-fluid bg-light" style="min-height: 100vh">
+            <div class="container">
+                <div class="jumbotron mt-4">
+					<div class="input-group mb-3">
+                        <input
+                            id="inputamount"
+							type="text"
+							class="form-control"
+							placeholder="Amount spent"
+							aria-label="Amount spent"
+							aria-describedby="spent in rupee"
+						/>
+						<div class="input-group-append">
+							<span class="input-group-text" id="spent in rupee">₹</span>
+						</div>
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="spent at">@</span>
+						</div>
+                        <input
+                            id="inputDesc"
+							type="text"
+							class="form-control"
+							placeholder="spent On"
+							aria-label="spent On"
+							aria-describedby="spent at"
+						/>
+						<div class="input-group-append">
+							<button class="btn btn-outline-primary" type="button" id="btnaddexpense">Add</button>
+						</div>
+					</div>
+                </div>
+                
+
+
+
+                <div>
+                    <ul class="list-group" id="expenseTable"></ul>
+                </div>
+
+                <!-- <div id="expenseTable"></div> -->
+            </div>
+        </div>
+
+
+        
         <script>
 
             //get the heading element
@@ -44,54 +95,100 @@
             function addExpenseToTotal(){
 
                 const expenseItem = {}; //object creation
-                //read value from inputamount
                 const textAmount = inputElement.value;
                 const textDesc = inputDescEl.value;
-
-                console.log({ textAmount, textDesc})
-                //convert it to number
                 const expense = parseInt(textAmount, 10)
 
                 expenseItem.desc = textDesc
                 expenseItem.amount = expense
+                expenseItem.moment = new Date();
 
                 allexpense.push(expenseItem)//array of objects
                 console.table(allexpense);
-
                 totalExpense = totalExpense + expense;
-
                 const someText = `The expense for this month is : ${totalExpense} `
-
                 headingEl.textContent =  someText ;
 
-                // show the table here
-                // const data1 = allexpense[0];
-                // const data2 = allexpense[1];
-
-                // const data1Text = `Expense : ${data1.amount} :: Desc : ${data1.desc}`;
-                // const data2Text = `Expense : ${data2.amount} :: Desc : ${data2.desc}`;
-
-                // const tableText = `
-                //     <div>${data1Text}</div>
-                //     <div>${data2Text}</div>
-                // `
-                const allexpenseHTML = allexpense.map(expense =>{
-
-                    return `<div> ${expense.amount} :: ${expense.desc}</div>`
-                });
-                const joinedAllexpenseHTML =  allexpenseHTML.join("")
-
-
-                console.log(joinedAllexpenseHTML);
-                expenseTableEl.innerHTML  = joinedAllexpenseHTML
+                renderlist(allexpense)
+                
 
             }
-            // read value  from input
-            // let expense = 0           
-            const element = document.querySelector("#btnaddexpense");
-            element.addEventListener("click",addExpenseToTotal, false);
+            
+            function createlistitem(expenseItem){
 
-   
+
+                return `
+                <li class="list-group-item d-flex justify-content-between">
+                        <div class="d-flex flex-column">
+                            ${expenseItem.desc}
+                            <small class="text-muted">${ getDateString(expenseItem) }</small>
+                        </div>
+                        <div>
+                            <span class="px-5">
+                                ${expenseItem.amount}
+                            </span>
+
+                            <button 
+                                type="button" 
+                                class="btn btn-outline-danger btn-sm"
+                                onclick="delitem(${expenseItem.moment.valueOf()})">
+                                
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </li>
+
+                `
+
+                }
+
+
+            function getDateString(expenseItem){
+
+                return expenseItem.moment.toLocaleDateString('en-US', { 
+                                year : 'numeric',
+                                month : 'long',
+                                day : 'numeric'
+                                
+                                })
+
+
+                }
+            function delitem(datevalue)
+                {
+                    // const newarr = [];
+
+                    // for(let i=0;i<allexpense.length;i++){
+
+                    //     if (allexpense[i].moment.valueOf()!==datevalue){
+
+                    //         newarr.push(allexpense[i]);
+
+                    //     }
+                    // }
+
+                    // const newarr = allexpense.filter(expenseItem => {
+
+                    //     if(expenseItem.moment.valueOf()!== datevalue){
+                    //         return expenseItem;
+                    //     }
+                    // })
+
+                    const newarr = allexpense.filter(expenseItem=>expenseItem.moment.valueOf()!==datevalue)
+
+                    renderlist(newarr);
+        
+
+                }
+                
+            function renderlist(arroflist){
+
+                const allexpenseHTML = arroflist.map(expenseItem =>createlistitem(expenseItem));
+                const joinedAllexpenseHTML =  allexpenseHTML.join("");
+                expenseTableEl.innerHTML  = joinedAllexpenseHTML;
+            }
+         const element = document.querySelector("#btnaddexpense");
+         element.addEventListener("click",addExpenseToTotal, false);   
         </script>
 
     </body>
